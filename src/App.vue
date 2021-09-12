@@ -131,7 +131,7 @@ export default {
         return
       }
      
-      const url = "http://localhost:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
+      const url = "http://82.156.11.109:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
        console.log(this.report_year)
       this.$axios.get(url).then((res) =>{
         const result = res.data.list;
@@ -146,7 +146,7 @@ export default {
     },
     // 搜索建议
     querySearch(queryString, cb) {
-      const url = "http://localhost:5000/api/query_fund?name="+this.code
+      const url = "http://82.156.11.109:5000/api/query_fund?name="+this.code
       console.log(this.code)
       this.$axios.get(url).then((res) =>{
         console.log(url)
@@ -169,7 +169,7 @@ export default {
       },
 
     geCount() {
-      const url = "http://localhost:5000/api/get_count"
+      const url = "http://82.156.11.109:5000/api/get_count"
       this.$axios.get(url).then((res) =>{
         console.log(res.data.list)
         this.fund_count = res.data.list[0].fund_count;
