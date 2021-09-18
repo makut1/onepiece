@@ -65,7 +65,7 @@
   </div>
 
 <el-row :gutter="20">
-  <el-col :span="8" v-for="(item,index) in fund_report_list" :offset="1">
+  <el-col :span="8" v-for="(item,index) in fund_report_list" :offset="1" :key="index">
     <el-card shadow="hover">
       <div slot="header" class="clearfix">
         <span>{{item.report_name}}</span>
@@ -95,10 +95,12 @@
 export default {
 
   data(){
+    let showDate =new Date();
+    let year = showDate.getFullYear();
     return {
       code:'',
       fund_report:'',
-      report_year:'',
+      report_year:''+year,
       fund_report_list:[],
       fund_list:[],
       fund_count:"",
@@ -132,7 +134,7 @@ export default {
       }
      
       const url = "http://82.156.11.109:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
-       console.log(this.report_year)
+      // const url = "http://localhost:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
       this.$axios.get(url).then((res) =>{
         const result = res.data.list;
         if(result == undefined || result.length <= 0){
@@ -147,10 +149,7 @@ export default {
     // 搜索建议
     querySearch(queryString, cb) {
       const url = "http://82.156.11.109:5000/api/query_fund?name="+this.code
-      console.log(this.code)
       this.$axios.get(url).then((res) =>{
-        console.log(url)
-        console.log(res.data.list)
         this.fund_list = res.data.list;
         cb(res.data.list)
       })
@@ -158,25 +157,21 @@ export default {
 
       createFilter(queryString) {
         return (fund) => {
-          console.log("createFilter"+fund.fund_name)
           return (fund.fund_name.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
         };
       },
 
       handleSelect(item) {
-        console.log(item.fund_name + item.fund_code);
         this.code=item.fund_code + " " + item.fund_name;
       },
 
     geCount() {
       const url = "http://82.156.11.109:5000/api/get_count"
       this.$axios.get(url).then((res) =>{
-        console.log(res.data.list)
         this.fund_count = res.data.list[0].fund_count;
         this.report_count = res.data.list[1].report_count;
       })
       },
-
       validCode(item){
         console.log("验证")
       }
