@@ -53,7 +53,6 @@
   :fetch-suggestions="querySearch"
   class="input"
   @select="handleSelect"
-  @change="validCode"
   >  
  <template slot-scope="props">
     <div class="fund_name">{{ props.item.fund_name }}</div>
@@ -61,7 +60,7 @@
   </template>
   </el-autocomplete>
 
-   <el-button slot="append" type="primary" icon="el-icon-search" :loading="false" @click="seach">搜索</el-button>
+   <el-button slot="append" type="primary" icon="el-icon-search" :loading="false" @click="search">搜索</el-button>
   </div>
 
 <el-row :gutter="20">
@@ -124,7 +123,7 @@ export default {
         duration: 5000
       })
     },
-    seach(){
+    search(){
       if(!this.code || this.code =='' || !this.report_year || this.report_year == ''){
         this.$message({
           message: '请输入年份和基金代码！',
