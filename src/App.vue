@@ -82,6 +82,12 @@
 <!-- <img src="./assets/logo.png"> -->
     <!-- <img src="./pic/houying.jpg" height="500px"> -->
   </el-main>
+
+  <el-footer>
+    <div>
+    <el-link href="https://beian.miit.gov.cn/"><i class="el-icon-view el-icon--right"></i>备案号：京ICP备2021030215号-1</el-link>
+  </div>
+    </el-footer>
   </el-container>
 
 
