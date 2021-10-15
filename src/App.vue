@@ -1,6 +1,6 @@
 <template>
-  <div id="app">
-    <el-container>
+  <!-- <div > -->
+    <el-container id="app">
   <el-header>
     <el-alert
     title="查看报告期内基金的投资策略和运作分析"
@@ -84,14 +84,15 @@
   </el-main>
 
   <el-footer>
-    <div>
-    <el-link href="https://beian.miit.gov.cn/"><i class="el-icon-view el-icon--right"></i>备案号：京ICP备2021030215号-1</el-link>
-  </div>
+      <div style="width:300px;margin:0 auto; padding:20px 0;">
+		 		<a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010502047213" style="display:inline-block;text-decoration:none;height:20px;line-height:20px;"><img src="./pic/beian.png" style="float:left;"/><p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">京公网安备 11010502047213号</p></a>
+        <el-link href="https://beian.miit.gov.cn/" type="info"> 京ICP备2021030215号-1</el-link> 
+		 	</div>
     </el-footer>
   </el-container>
 
 
-</div>
+<!-- </div> -->
 
   
 
