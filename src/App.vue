@@ -1,6 +1,6 @@
 <template>
-  <div id="app">
-    <el-container>
+  <!-- <div > -->
+    <el-container id="app">
   <el-header>
     <el-alert
     title="查看报告期内基金的投资策略和运作分析"
@@ -53,7 +53,6 @@
   :fetch-suggestions="querySearch"
   class="input"
   @select="handleSelect"
-  @change="validCode"
   >  
  <template slot-scope="props">
     <div class="fund_name">{{ props.item.fund_name }}</div>
@@ -61,11 +60,11 @@
   </template>
   </el-autocomplete>
 
-   <el-button slot="append" type="primary" icon="el-icon-search" :loading="false" @click="seach">搜索</el-button>
+   <el-button slot="append" type="primary" icon="el-icon-search" :loading="false" @click="search">搜索</el-button>
   </div>
 
 <el-row :gutter="20">
-  <el-col :span="8" v-for="(item,index) in fund_report_list" :offset="1">
+  <el-col :span="8" v-for="(item,index) in fund_report_list" :offset="1" :key="index">
     <el-card shadow="hover">
       <div slot="header" class="clearfix">
         <span>{{item.report_name}}</span>
@@ -90,10 +89,17 @@
 <!-- <img src="./assets/logo.png"> -->
     <!-- <img src="./pic/houying.jpg" height="500px"> -->
   </el-main>
+
+  <el-footer>
+      <div style="width:300px;margin:0 auto; padding:20px 0;">
+		 		<a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010502047213" style="display:inline-block;text-decoration:none;height:20px;line-height:20px;"><img src="./pic/beian.png" style="float:left;"/><p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">京公网安备 11010502047213号</p></a>
+        <el-link href="https://beian.miit.gov.cn/" type="info"> 京ICP备2021030215号-1</el-link> 
+		 	</div>
+    </el-footer>
   </el-container>
 
 
-</div>
+<!-- </div> -->
 
   
 
@@ -102,10 +108,12 @@
 export default {
 
   data(){
+    let showDate =new Date();
+    let year = showDate.getFullYear();
     return {
       code:'',
       fund_report:'',
-      report_year:'',
+      report_year:''+year,
       fund_report_list:[],
       fund_list:[],
       fund_count:"",
@@ -147,7 +155,7 @@ export default {
         duration: 5000
       })
     },
-    seach(){
+    search(){
       if(!this.code || this.code =='' || !this.report_year || this.report_year == ''){
         this.$message({
           message: '请输入年份和基金代码！',
@@ -157,7 +165,7 @@ export default {
       }
      
       const url = "http://82.156.11.109:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
-       console.log(this.report_year)
+      // const url = "http://localhost:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
       this.$axios.get(url).then((res) =>{
         const result = res.data.list;
         if(result == undefined || result.length <= 0){
@@ -172,10 +180,7 @@ export default {
     // 搜索建议
     querySearch(queryString, cb) {
       const url = "http://82.156.11.109:5000/api/query_fund?name="+this.code
-      console.log(this.code)
       this.$axios.get(url).then((res) =>{
-        console.log(url)
-        console.log(res.data.list)
         this.fund_list = res.data.list;
         cb(res.data.list)
       })
@@ -183,25 +188,21 @@ export default {
 
       createFilter(queryString) {
         return (fund) => {
-          console.log("createFilter"+fund.fund_name)
           return (fund.fund_name.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
         };
       },
 
       handleSelect(item) {
-        console.log(item.fund_name + item.fund_code);
         this.code=item.fund_code + " " + item.fund_name;
       },
 
     geCount() {
       const url = "http://82.156.11.109:5000/api/get_count"
       this.$axios.get(url).then((res) =>{
-        console.log(res.data.list)
         this.fund_count = res.data.list[0].fund_count;
         this.report_count = res.data.list[1].report_count;
       })
       },
-
       validCode(item){
         console.log("验证")
       }
