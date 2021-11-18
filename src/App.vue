@@ -72,12 +72,15 @@
         <div class="bottom clearfix">
            <p>{{item.report_content}}</p> 
           <time class="time">{{ item.create_time }}</time>
-          <el-button type="text" class="button" @click="dialogTableVisible = true">查看基金持仓</el-button>
-          <el-dialog title="收货地址" :visible.sync="dialogTableVisible">
+          <el-button type="text" class="button" @click="clickFundStockDetail(item)">查看基金持仓</el-button>
+<el-dialog title="前十名股票投资明细" width="60%" :visible.sync="dialogTableVisible" @open="open()">
   <el-table :data="gridData">
-    <el-table-column property="date" label="日期" width="150"></el-table-column>
-    <el-table-column property="name" label="姓名" width="200"></el-table-column>
-    <el-table-column property="address" label="地址"></el-table-column>
+    <el-table-column property="rank_num" label="序号" width="50"></el-table-column>
+    <el-table-column property="stock_code" label="股票代码" width="100"></el-table-column>
+    <el-table-column property="stock_name" label="股票名称"></el-table-column>
+    <el-table-column property="stock_nums" label="数量（股）"></el-table-column>
+    <el-table-column property="stock_value" label="公允价值（元）"></el-table-column>
+    <el-table-column property="ratio" label="占基金资产净值比例（%）"></el-table-column>
   </el-table>
 </el-dialog>
         </div>
@@ -112,29 +115,14 @@ export default {
     let year = showDate.getFullYear();
     return {
       code:'',
+      season:'',
       fund_report:'',
       report_year:''+year,
       fund_report_list:[],
       fund_list:[],
       fund_count:"",
       report_count:'',
-      gridData: [{
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }],
+      gridData: [],
       dialogTableVisible: false
     }
   },
@@ -205,7 +193,20 @@ export default {
       },
       validCode(item){
         console.log("验证")
-      }
+      },
+    clickFundStockDetail(item){
+        this.dialogTableVisible = true;
+        console.log(item.season);
+        this.season = item.season;
+      },
+    open() {
+      const url = "http://localhost:5000/api/query_fund_stock_detail?code="+this.code+"&year="+this.report_year+"&season="+this.season
+      this.$axios.get(url).then((res) =>{
+        this.gridData=res.data.list;
+      })
+      },
+
+
   },
    mounted() {
      console.log("页面加载啦")
