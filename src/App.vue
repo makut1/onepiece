@@ -200,7 +200,7 @@ export default {
         this.season = item.season;
       },
     open() {
-      const url = "http://localhost:5000/api/query_fund_stock_detail?code="+this.code+"&year="+this.report_year+"&season="+this.season
+      const url = "http://82.156.11.109:5000/api/query_fund_stock_detail?code="+this.code.split(" ")[0]+"&year="+this.report_year+"&season="+this.season
       this.$axios.get(url).then((res) =>{
         this.gridData=res.data.list;
       })
