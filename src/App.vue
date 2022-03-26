@@ -3,11 +3,10 @@
     <el-container id="app">
   <el-header>
     <el-alert
-    title="查看报告期内基金的投资策略和运作分析"
-    type="success"
+    title="资产配置 长期持有"
+    type="error"
     center
-    description="这是一句绕口令：黑灰化肥会挥发发灰黑化肥挥发；灰黑化肥会挥发发黑灰化肥发挥。 黑灰化肥会挥发发灰黑化肥黑灰挥发化为灰……"
-    show-icon
+    description="查看报告期内基金的投资策略和运作分析"
     >
   </el-alert>
 
@@ -15,7 +14,8 @@
   <el-main>
 
 <el-row :gutter="20" type="flex"  justify="center">
-  <el-col :span="3"><div class="grid-content bg-purple">
+  <el-col :span="3">
+    <div class="grid-content bg-purple">
     <el-card>
       <i class="el-icon-watermelon"> </i>
   <span class="card-panel-text">基金总数</span>
@@ -37,13 +37,18 @@
 
 <div class="block">
   <div style="margin-top: 20px;">
-
+  
+  <!-- <el-button icon="el-icon-arrow-left" slot="append" @click="preYearSearch(true)">前年</el-button> -->
    <el-date-picker
       v-model="report_year"
+      @change="search"
       type="year"
       placeholder="选择年份"
-      value-format="yyyy">
+      value-format="yyyy"
+      :picker-options="pickerOptions">
+      >
   </el-date-picker>
+  <!-- <el-button slot="append" @click="preYearSearch(false)">后年<i class="el-icon-arrow-right el-icon--right"></i></el-button> -->
 
   <el-autocomplete
   popper-class="my-autocomplete"
@@ -64,7 +69,8 @@
   </div>
 
 <el-row :gutter="20">
-  <el-col :span="8" v-for="(item,index) in fund_report_list" :offset="1" :key="index">
+  
+  <el-col :span="7" v-for="(item,index) in fund_report_list" :offset="1" :key="index">
     <el-card shadow="hover">
       <div slot="header" class="clearfix">
         <span>{{item.report_name}}</span>
@@ -87,6 +93,7 @@
      
     </el-card>
   </el-col>
+  
 </el-row>
 </div>
 <!-- <img src="./assets/logo.png"> -->
@@ -114,7 +121,7 @@ export default {
     let showDate =new Date();
     let year = showDate.getFullYear();
     return {
-      code:'',
+      code:'166002',
       season:'',
       fund_report:'',
       report_year:''+year,
@@ -123,7 +130,28 @@ export default {
       fund_count:"",
       report_count:'',
       gridData: [],
-      dialogTableVisible: false
+      dialogTableVisible: false,
+      pickerOptions: {
+          disabledDate(time) {
+            return time.getTime() > Date.now();
+          }
+          // },
+          // shortcuts: [{
+          //   text: '前年',
+          //   onClick(picker) {
+          //     let date = new Date()
+          //     console.log(this.report_year)
+          //     if(this.report_year != undefined){
+          //       date = new Date(this.report_year)
+          //     }
+          //     // this.report_year = date.getFullYear()+'';
+          //     date.setTime(date.getTime() - 3600 * 1000 * 24 * 365);
+          //     this.report_year = date.getFullYear()+'';
+          //     console.log(this.report_year)
+          //     picker.$emit('pick',new Date(this.report_year));
+          //   }
+          // }]
+        },
     }
   },
 
@@ -153,6 +181,38 @@ export default {
       }
      
       const url = "http://82.156.11.109:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
+      // const url = "http://localhost:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
+      this.$axios.get(url).then((res) =>{
+        const result = res.data.list;
+        if(result == undefined || result.length <= 0){
+          this.$message({
+           message: '暂未收录该基金报告',
+           });
+          return
+        }
+        this.fund_report_list = result
+      })
+    },
+    preYearSearch(preyear_flag){
+      console.log("preYearSearch")
+      console.log(preyear_flag)
+      if(!this.code || this.code =='' || !this.report_year || this.report_year == ''){
+        this.$message({
+          message: '请输入年份和基金代码！',
+          type: 'error'
+        });
+        return
+      }
+     
+     console.log(this.report_year-1)
+     var pre_year = parseInt(this.report_year)-1
+     if(!preyear_flag){
+       console.log("next year")
+       pre_year = parseInt(this.report_year)+1
+     }
+     //todo 更改日期框中的显示
+     this.report_year = ''+pre_year
+      const url = "http://82.156.11.109:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+pre_year
       // const url = "http://localhost:5000/api/query_fund_report?code="+this.code.split(" ")[0]+"&year="+this.report_year
       this.$axios.get(url).then((res) =>{
         const result = res.data.list;
@@ -211,6 +271,7 @@ export default {
    mounted() {
      console.log("页面加载啦")
      this.geCount();
+     this.search();
 
     }
 }
@@ -218,7 +279,8 @@ export default {
 
 <style>
 #app {
-  font-family: Helvetica, sans-serif;
+  /* font-family: Helvetica, sans-serif; */
+  font-family: "Microsoft YaHei","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","微软雅黑",Arial,sans-serif;
   text-align: center;
   font-size: small;
 }
@@ -333,4 +395,5 @@ margin-left: 1.16667%;
 .card-panel-num{
   font-size: 20px;
 }
+
 </style>
