@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Highcharts 世界地图</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/maps/modules/map.js"></script>
+  <!-- <script src="https://code.highcharts.com/mapdata/custom/world.js"></script> -->
+  <script src="https://code.jquery.com/jquery-1.8.3.min.js"></script>
+  <style>
+html,body{
+  height:95%;
+}
+
+#container {
+  height: 100%; 
+  min-width: 100%; 
+  max-width: 100%; 
+  margin: 0 auto;
+  text-align:center;
+}
+.loading {
+  margin-top: 10em;
+  text-align: center;
+  color: gray;
+}
+.error {
+  margin-top: 200px;
+}
+</style>
+</head>
+<body>
+  <div id="container">加载地图数据中</div>
+
+
+  <script>
+
+  // 动态加载 Script
+function loadScript(url, callback){
+  var script = document.createElement("script");
+  script.type = "text/javascript";
+  if (script.readyState){  //IE
+    script.onreadystatechange = function(){
+      if (script.readyState == "loaded" ||
+        script.readyState == "complete"){
+        script.onreadystatechange = null;
+        callback();
+      }
+    };
+  } else {  //Others
+    script.onload = function(){
+      callback();
+    };
+  }
+  script.src = url;
+  document.getElementsByTagName("head")[0].appendChild(script);
+}
+
+function getMapName(name) {
+  var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"),
+    r = window.location.search.substr(1).match(reg),
+    defaultMap = {
+      path: 'custom/world',
+      name: '记录你在全世界范围内看过的那些书籍。',
+      chineseName: '世界地图（罗宾森投影，高分辨率）',
+      cname: '阅读世界分布统计'
+    };
+  if(r!==null) {
+    var path = unescape(r[2]);
+    for(var key in Highcharts.mapsInfo) {
+      if(Highcharts.mapsInfo[key][path]) {
+        return {
+          path: path,
+          name: Highcharts.mapsInfo[key][path].name,
+          cname: Highcharts.mapsInfo[key][path].chineseName || ''
+        };
+      }
+    }
+  }
+  return defaultMap;
+}
+
+var map = getMapName('map'), url = 'http://code.highcharts.com/mapdata/' + map.path + '.js',api_url='http://localhost:5000/api/query_world_book';
+var booksList = {
+    "China": [
+        "邓小平时代",
+        "分析与思考：黄奇帆的复旦经济课",
+        "流浪地球"
+    ],
+    "Denmark": [
+        "燃烧的原野"
+    ],
+    "South Korea": [
+        "你的夏天还好吗？"
+    ],
+    "United Kingdom": [
+        "夜航西飞"
+    ],
+    "United States of America": [
+        "穷查理宝典",
+        "架构师修炼之道",
+        "一课经济学",
+        "程序员修炼之道：从小工到专家",
+        "学会提问",
+        "影响力",
+        "如何阅读一本书"
+    ]
+}
+// var booksList = [];
+$.ajaxSettings.async = false;// 设置ajax为同步请求
+// $.ajaxSettings.setTimeout(function() {}, 10);
+$.get(api_url,function(data,status){
+    booksList = data;
+    console.log(booksList)
+    });
+$.ajaxSettings.async = true;
+
+// 动态加载地图数据文件并生成图表。
+loadScript(url, function(){
+  // 生成随机数据
+  var mapdata = Highcharts.maps[map.path],data = [];
+  // Highcharts.getOptions().colors[0] = '#7FFFD4';
+  // Highcharts.getOptions().colors[0] = '#FFA500';
+  console.log(Highcharts.getOptions().colors)
+  Highcharts.each(mapdata.features, function(md, index) {
+    data.push({
+      'hc-key': md.properties['hc-key'],
+      'code3':md.properties['code3'],
+      'name': md.properties['name'],
+      'books': booksList[md.properties['name']],
+      // value: index,  // 生成 1 ~ 100 随机值
+      'value': booksList[md.properties['name']] == null ? 0 : booksList[md.properties['name']].length
+    });
+  });
+  // 初始化图表
+  // $('#container').highcharts('Map', {
+  Highcharts.mapChart('container', {
+    title : {
+      text : map.cname || map.name
+    },
+    subtitle : {
+      text : '地图数据： <a href="https://code.highcharts.com/mapdata/index.html">'+map.name + '</a>'
+    },
+    mapNavigation: {
+      enabled: true,
+      buttonOptions: {
+        verticalAlign: 'bottom'
+      }
+    },
+    colorAxis: {
+      min: 0,
+      stops: [
+        [0, '#ffffff'],
+        [0.05, '#FFFACD'],
+        // 1-黑色
+        [0.1, '#a4edba'],
+        [0.15, '#FFDAB9'],
+        [0.2, '#00FFFF'],
+        [0.25, '#54FF9F'],
+        [0.3, '#E6E6FA'],
+        [0.4, '#FFE4E1'],
+        [0.5, '#97FFFF'],
+        [0.6, '#7FFFD4'],
+        [0.65, '#FFE4E1'],
+        // [0.7, '#87CEEB'],
+        //Tomato-#FF6347  orangeRed-#FF4500 red-#FF0000
+        [0.7, '#FF6347'],
+        [0.8, '#C1FFC1'],
+        [0.9, '#FFD700'],
+        [1,'#FFA54F']
+        // [1, Highcharts.Color(Highcharts.getOptions().colors[9]).brighten(-0.5).get()]
+        // [1, Highcharts.Color(Highcharts.getOptions().colors[1]).get()]
+      ]
+    },
+    tooltip: {
+        data:data,
+        useHTML: true,
+        headerFormat: '<table><tr><th colspan="2">'+this.name+'</th></tr>',
+        pointFormatter: function () {
+          let books = this.books,
+            // str = '<tr><td style="color: #eb0e20">:'+this.name+ '</td>';
+          str = '<b>'+this.name+ ':</b<br/><hr/>';
+          this.value = 0;
+          if (this.books == null || this.books.length == 0){
+            return str + '<hr/>总数: 0 ';
+          }
+          for (let key in books) {
+            let order = key+1;
+            // str += '<tr><td><ul>' + order + '</td><td>' + books[key]+ '<ul></td></tr>';
+              str += '<li>'+books[key]+ '</li>';
+          }
+          str = str + '<hr/>总数: '+ this.books.length;
+          this.value = this.books.length;
+          return str;
+        },
+        footerFormat: '</table>'
+      },
+      
+    series : [{
+      data : data,
+      mapData: mapdata,
+      joinBy: 'hc-key',
+      name: '阅读情况',
+      states: {
+                hover: {
+                    color: '#a4edba',
+                    borderColor: 'black',
+                    dashStyle: 'shortdot'
+                }
+            },
+      allowPointSelect: true,
+      cursor: 'pointer',          
+      dataLabels: {
+        enabled: false,
+        format: '{point.name}'
+        // format: '{point.hc-key}'
+      }
+    },{ // Specify points using lat/lon
+            type: 'mappoint',
+            name: 'Cities',
+            color: Highcharts.getOptions().colors[1],
+            data: [{
+                name: 'London',
+                lat: 51.507222,
+                lon: -0.1275
+            }, {
+                name: '北京',
+                lat: 116.413384,
+                lon: 39.910925
+            }, {
+                name: 'Leeds',
+                lat: 53.799722,
+                lon: -1.549167
+            }, {
+                name: 'Glasgow',
+                lat: 55.858,
+                lon: -4.259
+            }, {
+                name: 'Sheffield',
+                lat: 53.383611,
+                lon: -1.466944
+            }, {
+                name: 'Liverpool',
+                lat: 53.4,
+                lon: -3
+            }, {
+                name: 'Bristol',
+                lat: 51.45,
+                lon: -2.583333
+            }, {
+                name: 'Belfast',
+                lat: 54.597,
+                lon: -5.93
+            }, {
+                name: 'Lerwick',
+                lat: 60.155,
+                lon: -1.145,
+                dataLabels: {
+                    align: 'left',
+                    x: 5,
+                    verticalAlign: 'middle'
+                }
+            }]
+        }
+  ]
+  });
+});
+  </script>
+</body>
+</html>
